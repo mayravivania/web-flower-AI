@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Flower Classifier AI 🌸</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(255, 105, 180, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 182, 193, 0.5);
+        }
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #e91e63;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(233, 30, 99, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            color: #ad1457;
+            font-weight: 400;
+        }
+        
+        .upload-section {
+            margin-bottom: 30px;
+        }
+        
+        .upload-options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-btn, .camera-btn {
+            flex: 1;
+            padding: 15px 10px;
+            border: 2px solid #f8bbd9;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #fce4ec, #f8bbd9);
+            color: #ad1457;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        
+        .upload-btn:hover, .camera-btn:hover {
+            border-color: #e91e63;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.2);
+        }
+        
+        .upload-area {
+            border: 3px dashed #f8bbd9;
+            border-radius: 20px;
+            padding: 40px 20px;
+            background: linear-gradient(45deg, #fce4ec, #f8bbd9);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-area:hover {
+            border-color: #e91e63;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(233, 30, 99, 0.2);
+        }
+        
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%) translateY(-100%); }
+            50% { transform: translateX(0%) translateY(0%); }
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            color: #e91e63;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .upload-text {
+            color: #ad1457;
+            font-weight: 500;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: #c2185b;
+            font-size: 0.9em;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .camera-section {
+            display: none;
+            margin-bottom: 20px;
+        }
+        
+        .camera-preview {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(233, 30, 99, 0.2);
+            margin-bottom: 15px;
+        }
+        
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .capture-btn, .close-camera-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .capture-btn {
+            background: linear-gradient(45deg, #e91e63, #f06292);
+            color: white;
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+        }
+        
+        .close-camera-btn {
+            background: #f8bbd9;
+            color: #ad1457;
+            border: 2px solid #f8bbd9;
+        }
+        
+        .capture-btn:hover, .close-camera-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(233, 30, 99, 0.2);
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .process-btn {
+            background: linear-gradient(45deg, #e91e63, #f06292);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
+        }
+        
+        .process-btn:active {
+            transform: translateY(0);
+        }
+        
+        .process-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f8bbd9;
+            border-top: 4px solid #e91e63;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #ad1457;
+            font-weight: 500;
+        }
+        
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(45deg, #fce4ec, #f8bbd9);
+            border-radius: 20px;
+            border: 2px solid #f8bbd9;
+        }
+        
+        .result-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #ad1457;
+            margin-bottom: 15px;
+        }
+        
+        .result-flower {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #e91e63;
+            margin-bottom: 10px;
+        }
+
+        .flowerDescription {
+        margin-top: 15px;
+        font-size: 0.95em;
+        color: #6a1b9a;
+        text-align: left;
+        line-height: 1.6;
+}
+        
+        .reset-btn {
+            background: linear-gradient(45deg, #f8bbd9, #e1bee7);
+            color: #ad1457;
+            border: 2px solid #f8bbd9;
+            padding: 10px 30px;
+            font-size: 1em;
+            font-weight: 500;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .reset-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(248, 187, 208, 0.4);
+        }
+        
+        .flowers-decoration {
+            position: absolute;
+            font-size: 2em;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .flower-1 { top: 10%; left: 10%; animation-delay: 0s; }
+        .flower-2 { top: 20%; right: 15%; animation-delay: 1s; }
+        .flower-3 { bottom: 10%; left: 20%; animation-delay: 2s; }
+        .flower-4 { bottom: 15%; right: 10%; animation-delay: 1.5s; }
+        
+        .error-message {
+            color: #d32f2f;
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="flowers-decoration flower-1">🌸</div>
+    <div class="flowers-decoration flower-2">🌺</div>
+    <div class="flowers-decoration flower-3">🌹</div>
+    <div class="flowers-decoration flower-4">🌷</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🌸 FloraLens 🌸</h1>
+            <p class="subtitle">Kenali jenis bunga dengan AI yang cerdas!</p>
+        </div>
+        
+        <div class="upload-section">
+            <div class="upload-options">
+                <button class="upload-btn" id="uploadBtn">
+                    📁 Upload Foto
+                </button>
+                <button class="camera-btn" id="cameraBtn">
+                    📷 Buka Kamera
+                </button>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <div class="upload-area" id="uploadArea">
+                <span class="upload-icon">🌺</span>
+                <div class="upload-text">Klik atau drag foto bunga kesini</div>
+                <div class="upload-hint">Mendukung JPG, PNG, JPEG</div>
+            </div>
+            
+            <input type="file" id="fileInput" accept=".jpg,.jpeg,.png" />
+            
+            <div class="camera-section" id="cameraSection">
+                <video id="cameraPreview" class="camera-preview" autoplay playsinline></video>
+                <div class="camera-controls">
+                    <button class="capture-btn" id="captureBtn">📸 Ambil Foto</button>
+                    <button class="close-camera-btn" id="closeCameraBtn">❌ Tutup</button>
+                </div>
+            </div>
+            
+            <img id="imagePreview" class="image-preview" alt="Preview" />
+        </div>
+        
+        <button class="process-btn" id="processBtn">
+            🔍 Analisis Bunga
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Sedang menganalisis bunga... 🌸</div>
+        </div>
+        
+        <div class="result" id="result">
+            <div class="result-title">🎉 Hasil Analisis</div>
+            <div class="result-flower" id="flowerType">-</div>
+            <div class="flowerDescription" id="flowerDescription">-</div>
+            <button class="reset-btn" id="resetBtn">Coba Lagi</button>
+        </div>
+    </div>
+    
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script>
+    let model;
+    let selectedFile;
+    let currentStream;
+
+    const flowerClasses = ['Aster', 'Astilbe', 'Bellflower', 'Black Eyed Susan', 'Calendula', 'Carnation', 'Coreopsis', 'Daffodil', 'Daisy', 'Dandelion', 'Iris', 'Lavender', 'Lily', 'Lotus', 'Magnolia', 'Marigold', 'Orchid', 'Poppy', 'Rose', 'Sunflower', 'Tulip', 'Water Lily'];
+
+    const flowerFacts = {
+      "Aster": "Aster (<em>Symphyotrichum</em>).\nBunga Aster banyak ditemukan di padang rumput atau di tepi hutan. Umumnya bunga Aster mekar di akhir musim panas hingga musim gugur.\n*Fakta menarik:* Namanya berasal dari bahasa Yunani yang berarti 'bintang', merujuk pada bentuk bunganya. Aster sering menjadi sumber nektar penting bagi lebah dan kupu-kupu di akhir musim panas saat bunga lain sudah layu.",
+      "Astilbe": "Astilbe (<em>Astilbe</em>).\nBunga Astilbe biasa ditemukan di hutan lembap atau di sepanjang tepi sungai. Bunga ini mekar di awal hingga pertengahan musim panas.\n*Fakta menarik:* Dikenal karena bunganya yang lebat, berbulu, dan menyerupai bulu burung. Astilbe sangat populer di kalangan pecinta taman karena keindahannya yang teduh dan toleransinya terhadap lingkungan yang lembap.",
+      "Bellflower": "Bellflower (<em>Campanula</em>)\nHabitat hidup bellflower beragam, mulai dari padang rumput hingga daerah pegunungan yang sejuk. Biasanya bunga ini mekar dari akhir musim semi hingga akhir musim panas.\n*Fakta Menarik:* Namanya berasal dari bahasa Latin 'campana' yang berarti 'lonceng kecil', merujuk pada bentuk bunganya. Warnanya seringkali biru atau ungu.",
+      "Black Eyed Susan": "Black-Eyed Susan (<em>Rudbeckia hirta</em>).\nBlack-Eyed Susan menjadi pemandangan umum di padang rumput selama musim panas hingga awal musim gugur.\n*Fakta Menarik:* Kelopaknya berwarna kuning cerah atau oranye dengan pusat gelap yang menyerupai mata. Black-Eyed Susan adalah bunga liar yang sangat umum dan mudah tumbuh.",
+      "Calendula": "Calendula (<em>Calendula officinalis</em> atau <em>Pot Marigold</em>).\nCalendula berasal dari wilayah Mediterania dan tumbuh baik di iklim sedang. Bunga ini mekar sepanjang musim semi hingga musim gugur dan bisa mekar terus-menerus di iklim hangat.\n*Fakta Menarik:* Kelopaknya bisa dimakan dan sering digunakan untuk menghias salad atau sebagai pewarna makanan alami. Bunga ini juga memiliki sejarah panjang dalam pengobatan herbal.",
+      "Carnation": "Carnation (<em>Dianthus caryophyllus</em>).\nBerasal dari wilayah Mediterania, bunga ini sangat popular dan dibudidayakan secara luas, mekar sepanjang tahun, puncaknya di musim semi-musim panas.\n*Fakta Menarik:* Dikenal sebagai 'bunga para dewa' dalam bahasa Yunani ('Dianthus'). Setiap warna memiliki makna simbolis yang berbeda, menjadikannya pilihan favorit untuk hadiah.",
+      "Coreopsis": "Coreopsis (<em>Coreopsis_</em>).\nBunga ini mekar sepanjang musim panas hingga awal musim gugur dan dapat ditemukan di padang rumput atau hutan terbuka.\n*Fakta Menarik:* Juga dikenal sebagai 'Tickseed' karena bijinya yang kecil menyerupai kutu.",
+      "Daisy": "Daisy (<em>Bellis perennis</em>).\nDaisy banyak ditemukan di padang rumput. Bunga ini mekar pada musim semi hingga musim gugur.\n*Fakta Menarik:* Daisy terkenal karena kebiasaannya menutup kelopaknya di malam hari dan membukanya kembali saat matahari terbit, itulah mengapa dinamakan 'day's eye' (mata hari).",
+      "Daffodil": "Daffodil (<em>Narcissus</em>).\nDaffodil berasal dari wilayah Mediterania, biasanya bunga ini mekar di akhir musim dingin hingga musim semi.\n*Fakta Menarik:* Salah satu bunga pertama yang mekar di musim semi, melambangkan awal yang baru dan harapan. Semua bagian daffodil beracun jika tertelan.",
+      "Dandelion": "Dandelion (<em>Taraxacum officinale</em>).\nBunga ini sangat adaptif dan bisa ditemukan hampir di mana saja, mekar dari musim semi hingga musim gugur.\n*Fakta Menarik:* Meskipun sering dianggap gulma, semua bagian dandelion (daun, bunga, akar) bisa dimakan dan kaya nutrisi. Mereka juga bunga pertama yang menyediakan nektar di musim semi untuk lebah.",
+      "Iris": "Iris (<em>Iris</em>).\nHabitatnya beragam, dari gurun hingga rawa, tersebar luas di Belahan Bumi Utara. Bunga iris mekar dari musim semi hingga awal musim panas.\n*Fakta Menarik:* Namanya berasal dari kata Yunani yang berarti 'pelangi' karena keragaman warna bunganya yang menakjubkan. Bentuk kelopaknya yang unik membuatnya mudah dikenali.",
+      "Lavender": "Lavender (<em>Lavandula angustifolia</em>).\nBerasal dari wilayah Mediterania, bunga ini mekar di musim panas.\n*Fakta Menarik:* Sangat terkenal dengan aromanya yang menenangkan dan sering digunakan dalam aromaterapi, kosmetik, dan sebagai tanaman obat.",
+      "Lily": "Lily (<em>Lilium</em>).\nLily mekar di musim panas dan dapat ditemukan di berbagai habitat.\n*Fakta Menarik:* Memiliki beragam warna dan bentuk, sering melambangkan kemurnian. Beberapa varietas memiliki aroma yang sangat kuat. Lily beracun bagi kucing.",
+      "Lotus": "Lotus (<em>Nelumbo nucifera</em>).\nLotus adalah bunga air yang sangat simbolis, terutama di Asia. Tumbuh di perairan dangkal, danau, dan rawa-rawa, bunga ini mekar di musim panas.\n*Fakta Menarik:* Merupakan bunga yang melambangkan kemurnian, pencerahan, dan kelahiran kembali. Daunnya memiliki sifat self-cleaning (efek lotus), yaitu kemampuan unik untuk membersihkan diri sendiri dari kotoran.",
+      "Magnolia": "Magnolia (<em>Magnolia</em>).\nHabitatnya beragam, dari Asia Timur hingga Amerika Utara dan Selatan. Bunga magnolia lebih suka iklim sedang hingga hangat. Akhir musim dingin hingga musim semi merupakan waktu bunga ini mekar.\n*Fakta Menarik:* Salah satu kelompok tumbuhan berbunga tertua, berevolusi sebelum lebah, sehingga bunganya diserbuki oleh kumbang. Bunganya biasanya besar dan berbau harum.",
+      "Marigold": "Marigold (<em>Tagetes</em>).\nHabitat asli bunga ini adalah di Amerika, khususnya Mexico dan Amerika Tengah. Marigold mekar di sepanjang musim panas hingga musim gugur.\n*Fakta Menarik:* Dikenal karena warnanya yang cerah (kuning, oranye, merah) dan kemampuannya untuk mengusir hama tertentu di kebun.",
+      "Orchid": "Orchid (<em>Orchidaceae</em>).\nHabitatnya sangat beragam, bisa ditemukan di hampir setiap habitat di bumi, kecuali gletser. Banyak yang tumbuh sebagai epifit (menempel di pohon) di hutan tropis.\n*Fakta Menarik:* Famili tumbuhan berbunga terbesar kedua, dengan lebih dari 28.000 spesies yang diketahui. Mereka memiliki bunga yang sangat unik dan kompleks, seringkali menyerupai serangga untuk menarik penyerbuk.",
+      "Poppy": "Poppy (<em>Papaver</em>).\nBiasa ditemukan di daerah beriklim sedang hingga subtropis di Belahan Bumi Utara. Kebanyakan ditemukan di lahan pertanian atau padang rumput. Bunga ini mekar di musim semi hingga musim panas.\n*Fakta Menarik:* Kelopaknya tipis dan rapuh, seringkali berwarna cerah (merah, oranye, kuning). Biji poppy dapat dimakan dan digunakan dalam masakan. Beberapa spesies adalah sumber opium.",
+      "Rose": "Rose (<em>Rosa</em>).\nBerasal dari Asia, Eropa, dan Amerika Utara, mawar mekar dari musim semi hingga musim gugur (tergantung varietas).\n*Fakta Menarik:* Salah satu bunga yang terkenal di dunia, melambangkan cinta dan keindahan. Ada ribuan varietas mawar dengan warna, bentuk, dan aroma yang tak terhingga.",
+      "Sunflower": "Sunflower (<em>Helianthus annuus</em>).\nBerasal dari Amerika Utara, biasa tumbuh di dataran terbuka dan padang rumput. Sunflower mekar pada saat musim panas.\n*Fakta Menarik:* Sunflower muda memiliki keunikan mengikuti pergerakan matahari (heliotropisme). Bijinya adalah sumber makanan yang populer dan juga menghasilkan minyak.",
+      "Tulip": "Tulip (<em>Tulipa</em>).\nBunga tulip bisa dijumpai di wilayah Asia Tengah, Timur Tengah, dan Afrika Utara, biasanya tulip mekar di musim semi.\n*Fakta Menarik:* Terkenal karena 'Tulip Mania' di Belanda pada abad ke-17. Ada ribuan varietas dengan warna dan bentuk yang sangat beragam.",
+      "Water Lily": "Waterlily (<em>Nymphaea</em>).\nBiasa dijumpai di perairan tawar dangkal di daerah beriklim sedang dan tropis di seluruh dunia. Waterlily biasanya mekar di musim panas.\n*Fakta Menarik:* Bunganya mengapung di permukaan air dan sering menutup di malam hari. Mereka memiliki peran ekologis penting dalam ekosistem akuatik."
+    };
+
+    async function loadModel() {
+        try {
+            console.log('Loading model...');
+            model = await tf.loadGraphModel('tfjs_model/model.json');
+            console.log("Model loaded:", model != null);
+            console.log('Model loaded successfully!');
+        } catch (error) {
+            console.error('Error loading model:', error);
+            showError('Gagal memuat model AI. Pastikan folder tfjs_model mengandung model.json dan file .bin.');
+        }
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 5000);
+    }
+        
+        // Event listeners
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+        
+        document.getElementById('uploadArea').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+        
+        document.getElementById('cameraBtn').addEventListener('click', openCamera);
+        document.getElementById('captureBtn').addEventListener('click', capturePhoto);
+        document.getElementById('closeCameraBtn').addEventListener('click', closeCamera);
+        
+        document.getElementById('uploadArea').addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.currentTarget.style.borderColor = '#e91e63';
+        });
+        
+        document.getElementById('uploadArea').addEventListener('dragleave', (e) => {
+            e.currentTarget.style.borderColor = '#f8bbd9';
+        });
+        
+        document.getElementById('uploadArea').addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.currentTarget.style.borderColor = '#f8bbd9';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        document.getElementById('processBtn').addEventListener('click', processImage);
+        document.getElementById('resetBtn').addEventListener('click', resetApp);
+        
+        // Camera functions
+        async function openCamera() {
+            try {
+                // Check if camera is supported
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    showError('Kamera tidak didukung di browser ini');
+                    return;
+                }
+                
+                // Request camera permission
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: 'environment' // Use rear camera if available
+                    }
+                });
+                
+                currentStream = stream;
+                const video = document.getElementById('cameraPreview');
+                video.srcObject = stream;
+                
+                // Show camera section and hide upload area
+                document.getElementById('cameraSection').style.display = 'block';
+                document.getElementById('uploadArea').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                if (error.name === 'NotAllowedError') {
+                    showError('Izin akses kamera ditolak. Mohon izinkan akses kamera dan coba lagi.');
+                } else if (error.name === 'NotFoundError') {
+                    showError('Kamera tidak ditemukan di perangkat ini.');
+                } else {
+                    showError('Gagal mengakses kamera. ' + error.message);
+                }
+            }
+        }
+        
+        function capturePhoto() {
+            const video = document.getElementById('cameraPreview');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw video frame to canvas
+            ctx.drawImage(video, 0, 0);
+            
+            // Convert canvas to blob and create file
+            canvas.toBlob((blob) => {
+                const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+                handleFile(file);
+                closeCamera();
+            }, 'image/jpeg', 0.8);
+        }
+        
+        function closeCamera() {
+            // Stop camera stream
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            // Hide camera section and show upload area
+            document.getElementById('cameraSection').style.display = 'none';
+            document.getElementById('uploadArea').style.display = 'block';
+        }
+        
+        function handleFile(file) {
+            if (!file.type.match('image.*')) {
+                showError('Mohon pilih file gambar (JPG, PNG, JPEG)');
+                return;
+            }
+            
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+            const preview = document.getElementById('imagePreview');
+            
+            // Pindahkan tombol dan prediksi ke dalam onload
+            preview.onload = () => {
+                console.log("✅ Gambar selesai dimuat di DOM");
+                document.getElementById('processBtn').style.display = 'inline-block';
+            };
+            
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+};
+            reader.readAsDataURL(file);
+        }
+        
+        async function processImage() {
+            if (!selectedFile) {
+                showError('Mohon pilih gambar terlebih dahulu');
+                return;
+            }
+            
+            if (!model) {
+                showError('Model belum selesai dimuat. Mohon tunggu beberapa detik.');
+                return;
+            }
+            
+            // Tampilkan loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('processBtn').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            
+            try {
+                // Preprocess image
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 224;
+                canvas.height = 224;
+
+                // gambar ulang gambar asli ke canvas, jadi scaling-nya presisi
+                ctx.drawImage(document.getElementById('imagePreview'), 0, 0, 224, 224);
+
+                // ambil tensor dari canvas
+                const tensor = tf.browser.fromPixels(canvas)
+                .toFloat()
+                .expandDims();
+
+                console.log("Tensor shape:", tensor.shape);
+                console.log("Model input shape:", model.inputs[0].shape);
+
+                    console.log("Input Tensor Shape:", tensor.shape);
+                    tensor.min().print();
+                    tensor.max().print();
+                
+                // Prediksi
+               const rawPreds = model.predict(tensor);
+                rawPreds.print(); // opsional, lihat bentuk tensor output
+
+                const softmaxPreds = tf.softmax(rawPreds); // Tambahkan softmax agar hasil seperti di Python
+                const predictions = await softmaxPreds.data(); // Ambil hasil probabilitas
+
+                console.log("Predictions array (softmax):", predictions);
+
+                rawPreds.dispose();
+                softmaxPreds.dispose();
+                
+                // Temukan kelas dengan confidence tertinggi
+                const maxIndex = predictions.indexOf(Math.max(...predictions));
+                const confidence = Math.max(...predictions);
+                
+                // Tampilkan hasil
+                const flowerType = flowerClasses[maxIndex] || 'Tidak Diketahui';
+                const flowerDescription = flowerFacts[flowerType] || 'Informasi bunga tidak tersedia saat ini.';
+                const confidencePercent = (confidence * 100).toFixed(1);
+                
+                document.getElementById('flowerType').textContent = flowerType;
+                document.getElementById('flowerDescription').innerHTML = flowerDescription;
+                
+                // Cleanup tensor
+                tensor.dispose();
+                
+                // Tampilkan hasil
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error processing image:', error);
+                showError('Terjadi kesalahan saat memproses gambar. Silakan coba lagi.');
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('processBtn').style.display = 'inline-block';
+            }
+        }
+        
+        function resetApp() {
+            selectedFile = null;
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('processBtn').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            
+            // Close camera if open
+            closeCamera();
+        }
+        
+        // Close camera when page is unloaded
+        window.addEventListener('beforeunload', () => {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+    });
+
+    window.addEventListener('load', loadModel);
+</script>
+</body>
+</html>
